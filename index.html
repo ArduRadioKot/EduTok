@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WikiTock - Wikipedia Shorts</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="video-container">
+            <div class="video-card">
+                <div class="content">
+                    <img src="" alt="Article image" class="article-image">
+                    <div class="article-info">
+                        <h2 class="article-title"></h2>
+                        <p class="article-excerpt"></p>
+                        <a href="#" class="read-more-btn" target="_blank">Read Full Article</a>
+                    </div>
+                </div>
+                <div class="interaction-buttons">
+                    <button class="like-btn">❤️</button>
+                    <button class="next-btn">⏭️</button>
+                </div>
+            </div>
+        </div>
+        <nav class="bottom-toolbar">
+            <button class="toolbar-btn active" data-page="home">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </button>
+            <button class="toolbar-btn" data-page="liked">
+                <i class="fas fa-heart"></i>
+                <span>Liked</span>
+            </button>
+            <button class="toolbar-btn" data-page="settings">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </button>
+        </nav>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
