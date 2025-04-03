@@ -36,6 +36,8 @@ body {
     border-radius: 8px;
     overflow: hidden;
     transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+    background-size: cover;
+    background-position: center;
 }
 
 .video-card.swiping {
@@ -52,16 +54,26 @@ body {
     opacity: 0;
 }
 
+.video-card.swipe-up {
+    transform: translateY(-100%);
+    opacity: 0;
+}
+
+.video-card.swipe-down {
+    transform: translateY(100%);
+    opacity: 0;
+}
+
 .video-card.next {
     position: absolute;
-    top: 0;
+    top: 100%;
     left: 0;
-    transform: translateX(100%);
+    transform: translateY(0);
     opacity: 0;
 }
 
 .video-card.next.swipe-in {
-    transform: translateX(0);
+    transform: translateY(-100%);
     opacity: 1;
 }
 
@@ -70,6 +82,7 @@ body {
     display: flex;
     flex-direction: column;
     padding: 20px;
+    background-color: rgba(0, 0, 0, 0.5);
 }
 
 .article-image {
@@ -79,6 +92,7 @@ body {
     border-radius: 8px;
     margin-bottom: 20px;
     transition: transform 0.3s ease;
+    display: none;
 }
 
 .article-image:hover {
@@ -90,6 +104,9 @@ body {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 
 .article-title {
@@ -350,8 +367,24 @@ body {
     transform: translateY(-50%);
 }
 
+.swipe-indicator.up {
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.swipe-indicator.down {
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
 /* Media query for mobile devices */
 @media (max-width: 768px) {
+    .app-container {
+        height: 100vh; /* Make sure app container takes full height */
+    }
+
     .video-container {
         max-width: 100%;
         height: calc(100vh - 50px); /* Adjust height for smaller screens */
@@ -379,6 +412,12 @@ body {
 
     .bottom-toolbar {
         height: 50px;
+        position: fixed; /* Fix the bottom toolbar to the bottom */
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        z-index: 200; /* Ensure it's above other elements */
     }
 
     .toolbar-btn {
@@ -401,4 +440,24 @@ body {
     .liked-article-item h3 {
         font-size: 14px;
     }
+}
+
+/* Loading spinner styles */
+.loading-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 4px solid #fff;
+    width: 40px;
+    height: 40px;
+    animation: spin 2s linear infinite;
+    z-index: 1;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
 } 

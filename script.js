@@ -17,14 +17,15 @@ class WikiTock {
         this.settings = {
             language: 'en',
             showImages: true,
-            autoPlay: true
+            autoPlay: true,
+            articleSource: 'all' // Default value
         };
         
         // Swipe variables
-        this.touchStartX = 0;
-        this.touchEndX = 0;
+        this.touchStartY = 0;
+        this.touchEndY = 0;
         this.isSwiping = false;
-        this.swipeThreshold = 100; // minimum distance for a swipe
+        this.swipeThreshold = 50; // minimum distance for a swipe
         
         this.init();
     }
@@ -63,7 +64,7 @@ class WikiTock {
     handleTouchStart(e) {
         if (this.currentPage !== 'home') return;
         
-        this.touchStartX = e.touches[0].clientX;
+        this.touchStartY = e.touches[0].clientY;
         this.isSwiping = true;
         this.videoCard.classList.add('swiping');
         
@@ -74,16 +75,16 @@ class WikiTock {
     handleTouchMove(e) {
         if (!this.isSwiping) return;
         
-        this.touchEndX = e.touches[0].clientX;
-        const diffX = this.touchEndX - this.touchStartX;
+        this.touchEndY = e.touches[0].clientY;
+        const diffY = this.touchEndY - this.touchStartY;
         
         // Apply transform based on swipe distance
-        if (Math.abs(diffX) > 10) {
-            this.videoCard.style.transform = `translateX(${diffX}px)`;
-            this.videoCard.style.opacity = 1 - Math.abs(diffX) / 500;
+        if (Math.abs(diffY) > 10) {
+            this.videoCard.style.transform = `translateY(${diffY}px)`;
+            this.videoCard.style.opacity = 1 - Math.abs(diffY) / 500;
             
             // Show/hide indicators based on swipe direction
-            this.updateSwipeIndicators(diffX);
+            this.updateSwipeIndicators(diffY);
         }
     }
     
@@ -93,25 +94,25 @@ class WikiTock {
         this.isSwiping = false;
         this.videoCard.classList.remove('swiping');
         
-        const diffX = this.touchEndX - this.touchStartX;
+        const diffY = this.touchEndY - this.touchStartY;
         
         // Determine if swipe was significant enough
-        if (Math.abs(diffX) > this.swipeThreshold) {
-            if (diffX > 0) {
-                // Swipe right - go to previous article
-                this.videoCard.classList.add('swipe-right');
+        if (Math.abs(diffY) > this.swipeThreshold) {
+            if (diffY > 0) {
+                // Swipe down - go to previous article
+                this.videoCard.classList.add('swipe-down');
                 setTimeout(() => {
                     this.loadRandomArticle();
-                    this.videoCard.classList.remove('swipe-right');
+                    this.videoCard.classList.remove('swipe-down');
                     this.videoCard.style.transform = '';
                     this.videoCard.style.opacity = '';
                 }, 300);
             } else {
-                // Swipe left - go to next article
-                this.videoCard.classList.add('swipe-left');
+                // Swipe up - go to next article
+                this.videoCard.classList.add('swipe-up');
                 setTimeout(() => {
                     this.loadRandomArticle();
-                    this.videoCard.classList.remove('swipe-left');
+                    this.videoCard.classList.remove('swipe-up');
                     this.videoCard.style.transform = '';
                     this.videoCard.style.opacity = '';
                 }, 300);
@@ -129,7 +130,7 @@ class WikiTock {
     handleMouseDown(e) {
         if (this.currentPage !== 'home') return;
         
-        this.touchStartX = e.clientX;
+        this.touchStartY = e.clientY;
         this.isSwiping = true;
         this.videoCard.classList.add('swiping');
         
@@ -140,16 +141,16 @@ class WikiTock {
     handleMouseMove(e) {
         if (!this.isSwiping) return;
         
-        this.touchEndX = e.clientX;
-        const diffX = this.touchEndX - this.touchStartX;
+        this.touchEndY = e.clientY;
+        const diffY = this.touchEndY - this.touchStartY;
         
         // Apply transform based on swipe distance
-        if (Math.abs(diffX) > 10) {
-            this.videoCard.style.transform = `translateX(${diffX}px)`;
-            this.videoCard.style.opacity = 1 - Math.abs(diffX) / 500;
+        if (Math.abs(diffY) > 10) {
+            this.videoCard.style.transform = `translateY(${diffY}px)`;
+            this.videoCard.style.opacity = 1 - Math.abs(diffY) / 500;
             
             // Show/hide indicators based on swipe direction
-            this.updateSwipeIndicators(diffX);
+            this.updateSwipeIndicators(diffY);
         }
     }
     
@@ -159,25 +160,25 @@ class WikiTock {
         this.isSwiping = false;
         this.videoCard.classList.remove('swiping');
         
-        const diffX = this.touchEndX - this.touchStartX;
+        const diffY = this.touchEndY - this.touchStartY;
         
         // Determine if swipe was significant enough
-        if (Math.abs(diffX) > this.swipeThreshold) {
-            if (diffX > 0) {
-                // Swipe right - go to previous article
-                this.videoCard.classList.add('swipe-right');
+        if (Math.abs(diffY) > this.swipeThreshold) {
+            if (diffY > 0) {
+                // Swipe down - go to previous article
+                this.videoCard.classList.add('swipe-down');
                 setTimeout(() => {
                     this.loadRandomArticle();
-                    this.videoCard.classList.remove('swipe-right');
+                    this.videoCard.classList.remove('swipe-down');
                     this.videoCard.style.transform = '';
                     this.videoCard.style.opacity = '';
                 }, 300);
             } else {
-                // Swipe left - go to next article
-                this.videoCard.classList.add('swipe-left');
+                // Swipe up - go to next article
+                this.videoCard.classList.add('swipe-up');
                 setTimeout(() => {
                     this.loadRandomArticle();
-                    this.videoCard.classList.remove('swipe-left');
+                    this.videoCard.classList.remove('swipe-up');
                     this.videoCard.style.transform = '';
                     this.videoCard.style.opacity = '';
                 }, 300);
@@ -193,31 +194,31 @@ class WikiTock {
     }
     
     createSwipeIndicators() {
-        // Create left indicator
-        const leftIndicator = document.createElement('div');
-        leftIndicator.className = 'swipe-indicator left';
-        leftIndicator.innerHTML = '<i class="fas fa-chevron-left"></i>';
-        this.videoContainer.appendChild(leftIndicator);
+        // Create up indicator
+        const upIndicator = document.createElement('div');
+        upIndicator.className = 'swipe-indicator up';
+        upIndicator.innerHTML = '<i class="fas fa-chevron-up"></i>';
+        this.videoContainer.appendChild(upIndicator);
         
-        // Create right indicator
-        const rightIndicator = document.createElement('div');
-        rightIndicator.className = 'swipe-indicator right';
-        rightIndicator.innerHTML = '<i class="fas fa-chevron-right"></i>';
-        this.videoContainer.appendChild(rightIndicator);
+        // Create down indicator
+        const downIndicator = document.createElement('div');
+        downIndicator.className = 'swipe-indicator down';
+        downIndicator.innerHTML = '<i class="fas fa-chevron-down"></i>';
+        this.videoContainer.appendChild(downIndicator);
     }
     
-    updateSwipeIndicators(diffX) {
-        const leftIndicator = document.querySelector('.swipe-indicator.left');
-        const rightIndicator = document.querySelector('.swipe-indicator.right');
+    updateSwipeIndicators(diffY) {
+        const upIndicator = document.querySelector('.swipe-indicator.up');
+        const downIndicator = document.querySelector('.swipe-indicator.down');
         
-        if (diffX > 0) {
-            // Swiping right
-            leftIndicator.style.opacity = Math.min(1, diffX / 200);
-            rightIndicator.style.opacity = 0;
+        if (diffY > 0) {
+            // Swiping down
+            upIndicator.style.opacity = 0;
+            downIndicator.style.opacity = Math.min(1, diffY / 200);
         } else {
-            // Swiping left
-            leftIndicator.style.opacity = 0;
-            rightIndicator.style.opacity = Math.min(1, Math.abs(diffX) / 200);
+            // Swiping up
+            upIndicator.style.opacity = Math.min(1, Math.abs(diffY) / 200);
+            downIndicator.style.opacity = 0;
         }
     }
     
@@ -320,6 +321,14 @@ class WikiTock {
                     <span>Auto-play Next Article</span>
                     <input type="checkbox" ${this.settings.autoPlay ? 'checked' : ''}>
                 </label>
+                <label>
+                    <span>Article Source</span>
+                    <select id="article-source-select">
+                        <option value="wikipedia" ${this.settings.articleSource === 'wikipedia' ? 'selected' : ''}>Wikipedia</option>
+                        <option value="habr" ${this.settings.articleSource === 'habr' ? 'selected' : ''}>Habr</option>
+                        <option value="all" ${this.settings.articleSource === 'all' ? 'selected' : ''}>All</option>
+                    </select>
+                </label>
             </div>
         `;
         
@@ -339,6 +348,12 @@ class WikiTock {
                 this.settings[setting] = e.target.checked;
                 this.saveSettings();
             });
+        });
+
+        const articleSourceSelect = settingsPanel.querySelector('#article-source-select');
+        articleSourceSelect.addEventListener('change', (e) => {
+            this.settings.articleSource = e.target.value;
+            this.saveSettings();
         });
     }
     
@@ -361,6 +376,19 @@ class WikiTock {
     }
     
     async fetchRandomArticle() {
+        const source = this.settings.articleSource;
+        if (source === 'wikipedia' || source === 'all') {
+            if (source === 'all' && Math.random() < 0.5) {
+                return this.fetchRandomWikipediaArticle();
+            } else {
+                return this.fetchRandomWikipediaArticle();
+            }
+        } else if (source === 'habr') {
+            return this.fetchRandomHabrArticle();
+        }
+    }
+    
+    async fetchRandomWikipediaArticle() {
         try {
             // First, get a random article title
             const response = await fetch(`https://${this.settings.language}.wikipedia.org/w/api.php?action=query&format=json&list=random&rnnamespace=0&rnlimit=1&origin=*`);
@@ -385,6 +413,29 @@ class WikiTock {
         }
     }
     
+    async fetchRandomHabrArticle() {
+        try {
+            const response = await fetch('https://m.habr.com/kek/v2/articles/?limit=1&fl=ru&hl=ru');
+            const data = await response.json();
+            if (data.articles && data.articles.length > 0) {
+                const article = data.articles[0];
+
+                return {
+                    title: article.title,
+                    extract: article.description,
+                    url: `https://habr.com/ru/articles/${article.id}/`,
+                    imageUrl: 'https://via.placeholder.com/400x300?text=No+Image'
+                };
+            } else {
+                console.warn('No articles found in Habr response:', data);
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching Habr article:', error);
+            return null;
+        }
+    }
+    
     async loadRandomArticle() {
         try {
             // Use preloaded article if available
@@ -404,10 +455,6 @@ class WikiTock {
                     this.showError();
                 }
             }
-            
-            if (this.settings.autoPlay) {
-                setTimeout(() => this.loadRandomArticle(), 10000); // Auto-play next article after 10 seconds
-            }
         } catch (error) {
             console.error('Error loading article:', error);
             this.showError();
@@ -417,7 +464,22 @@ class WikiTock {
     updateUI() {
         this.articleTitle.textContent = this.currentArticle.title;
         this.articleExcerpt.textContent = this.currentArticle.extract;
-        this.articleImage.src = this.settings.showImages ? this.currentArticle.imageUrl : 'https://via.placeholder.com/400x300?text=No+Image';
+
+        const loadingSpinner = document.createElement('div');
+        loadingSpinner.className = 'loading-spinner';
+        this.videoCard.appendChild(loadingSpinner);
+
+        const img = new Image();
+        img.onload = () => {
+            this.videoCard.style.backgroundImage = `url(${this.settings.showImages ? this.currentArticle.imageUrl : 'https://via.placeholder.com/400x300?text=No+Image'})`;
+            loadingSpinner.remove();
+        };
+        img.onerror = () => {
+            this.videoCard.style.backgroundImage = `url(https://via.placeholder.com/400x300?text=Error)`;
+            loadingSpinner.remove();
+        };
+        img.src = this.settings.showImages ? this.currentArticle.imageUrl : 'https://via.placeholder.com/400x300?text=No+Image';
+
         this.readMoreBtn.href = this.currentArticle.url;
         
         // Update like button state
@@ -438,7 +500,7 @@ class WikiTock {
     showError() {
         this.articleTitle.textContent = 'Error loading article';
         this.articleExcerpt.textContent = 'Please try again later';
-        this.articleImage.src = 'https://via.placeholder.com/400x300?text=Error';
+        this.videoCard.style.backgroundImage = 'url(https://via.placeholder.com/400x300?text=Error)';
     }
 }
 
