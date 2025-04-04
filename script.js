@@ -401,11 +401,19 @@ class WikiTock {
             const pageId = Object.keys(articleData.query.pages)[0];
             const article = articleData.query.pages[pageId];
             
+            let imageUrl = 'https://dummyimage.com/400x300/000/fff&text=No+Image';
+            if (article.original) {
+                imageUrl = article.original.source;
+                if (article.original.width > 800) {
+                    imageUrl = article.original.source.replace(/\/[^\/]+$/, '/800px-' + article.title + article.original.source.substring(article.original.source.lastIndexOf('.')));
+                }
+            }
+            
             return {
                 title: article.title,
                 extract: article.extract,
                 url: `https://${this.settings.language}.wikipedia.org/wiki/${encodeURIComponent(article.title)}`,
-                imageUrl: article.original ? article.original.source : 'https://via.placeholder.com/400x300?text=No+Image'
+                imageUrl: imageUrl
             };
         } catch (error) {
             console.error('Error fetching article:', error);
@@ -415,19 +423,36 @@ class WikiTock {
     
     async fetchRandomHabrArticle() {
         try {
-            const response = await fetch('https://m.habr.com/kek/v2/articles/?limit=1&fl=ru&hl=ru');
-            const data = await response.json();
-            if (data.articles && data.articles.length > 0) {
-                const article = data.articles[0];
+            const corsProxy = 'https://api.allorigins.win/raw?url=';
+            const url = corsProxy + encodeURIComponent('https://habr.com/ru/articles/');
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error(`CORS proxy error: ${response.status} ${response.statusText}`);
+            }
+
+            const text = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(text, 'text/html');
+            const articles = Array.from(doc.querySelectorAll('.tm-articles-list__item'));
+
+            if (articles.length > 0) {
+                const randomArticle = articles[Math.floor(Math.random() * articles.length)];
+                const titleElement = randomArticle.querySelector('.tm-article-snippet__title-link span');
+                const title = titleElement ? titleElement.textContent : 'No Title';
+                const articleLink = randomArticle.querySelector('.tm-article-snippet__title-link');
+                const url = articleLink ? 'https://habr.com' + articleLink.getAttribute('href') : null;
+                const descriptionElement = randomArticle.querySelector('.tm-article-body p');
+                const extract = descriptionElement ? descriptionElement.textContent : 'No Extract';
 
                 return {
-                    title: article.title,
-                    extract: article.description,
-                    url: `https://habr.com/ru/articles/${article.id}/`,
-                    imageUrl: 'https://via.placeholder.com/400x300?text=No+Image'
+                    title: title,
+                    extract: extract,
+                    url: url,
+                    imageUrl: 'https://dummyimage.com/400x300/000/fff&text=No+Image'
                 };
             } else {
-                console.warn('No articles found in Habr response:', data);
+                console.warn('No articles found on Habr');
                 return null;
             }
         } catch (error) {
@@ -466,7 +491,11 @@ class WikiTock {
         this.articleExcerpt.textContent = this.currentArticle.extract;
 
         const img = new Image();
-        this.videoCard.style.backgroundImage = `url("https://via.placeholder.com/100x75?text=Loading")`;
+        if (this.settings.articleSource === 'habr') {
+            this.videoCard.style.backgroundImage = `url("https://habr.com/img/habr_logo.svg")`;
+        } else {
+            this.videoCard.style.backgroundImage = `url("https://dummyimage.com/100x75/000/fff&text=Loading")`;
+        }
         img.onload = async () => {
             try {
                 await img.decode();
@@ -478,7 +507,7 @@ class WikiTock {
             loadingSpinner.remove();
         };
         img.onerror = () => {
-            this.videoCard.style.backgroundImage = `url("https://via.placeholder.com/400x300?text=Error")`;
+            this.videoCard.style.backgroundImage = `url("https://dummyimage.com/400x300/000/fff&text=Error")`;
             loadingSpinner.remove();
         };
         const loadingSpinner = document.createElement('div');
