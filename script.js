@@ -27,6 +27,12 @@ class WikiTock {
         this.isSwiping = false;
         this.swipeThreshold = 50; // minimum distance for a swipe
         
+        this.sources = {
+            wikipedia: true,
+            habr: true,
+            siteducation: true
+        };
+        
         this.init();
     }
     
@@ -310,7 +316,6 @@ class WikiTock {
                     <select id="language-select">
                         <option value="en" ${this.settings.language === 'en' ? 'selected' : ''}>English</option>
                         <option value="ru" ${this.settings.language === 'ru' ? 'selected' : ''}>Russian</option>
-                        <option value="es" ${this.settings.language === 'es' ? 'selected' : ''}>Spanish</option>
                     </select>
                 </label>
                 <label>
@@ -326,6 +331,7 @@ class WikiTock {
                     <select id="article-source-select">
                         <option value="wikipedia" ${this.settings.articleSource === 'wikipedia' ? 'selected' : ''}>Wikipedia</option>
                         <option value="habr" ${this.settings.articleSource === 'habr' ? 'selected' : ''}>Habr</option>
+                        <option value="siteducation" ${this.settings.articleSource === 'siteducation' ? 'selected' : ''}>SITeducation</option>
                         <option value="all" ${this.settings.articleSource === 'all' ? 'selected' : ''}>All</option>
                     </select>
                 </label>
@@ -354,6 +360,9 @@ class WikiTock {
         articleSourceSelect.addEventListener('change', (e) => {
             this.settings.articleSource = e.target.value;
             this.saveSettings();
+            if (this.currentPage === 'home') {
+                this.loadRandomArticle();
+            }
         });
     }
     
@@ -376,15 +385,29 @@ class WikiTock {
     }
     
     async fetchRandomArticle() {
-        const source = this.settings.articleSource;
-        if (source === 'wikipedia' || source === 'all') {
-            if (source === 'all' && Math.random() < 0.5) {
-                return this.fetchRandomWikipediaArticle();
-            } else {
-                return this.fetchRandomWikipediaArticle();
-            }
-        } else if (source === 'habr') {
-            return this.fetchRandomHabrArticle();
+        // Определяем источник на основе настроек
+        let source = this.settings.articleSource;
+        
+        if (source === 'all') {
+            // Создаем массив доступных источников
+            const availableSources = [];
+            if (this.sources.wikipedia) availableSources.push('wikipedia');
+            if (this.sources.habr) availableSources.push('habr');
+            if (this.sources.siteducation) availableSources.push('siteducation');
+            
+            // Выбираем случайный источник
+            source = availableSources[Math.floor(Math.random() * availableSources.length)];
+        }
+
+        switch (source) {
+            case 'wikipedia':
+                return await this.fetchRandomWikipediaArticle();
+            case 'habr':
+                return await this.fetchRandomHabrArticle();
+            case 'siteducation':
+                return await this.fetchRandomSITArticle();
+            default:
+                throw new Error('No source selected');
         }
     }
     
@@ -458,6 +481,40 @@ class WikiTock {
         } catch (error) {
             console.error('Error fetching Habr article:', error);
             return null;
+        }
+    }
+    
+    async fetchRandomSITArticle() {
+        try {
+            // Получаем список всех статей
+            const response = await fetch('https://x200l.github.io/SITeducation/app.js');
+            const text = await response.text();
+            
+            // Извлекаем массив статей из текста файла
+            const articlesMatch = text.match(/const articlesInfo = \[([\s\S]*?)\];/);
+            if (!articlesMatch) throw new Error('Articles not found');
+            
+            const articlesText = `[${articlesMatch[1]}]`;
+            const articles = JSON.parse(articlesText);
+            
+            // Выбираем случайную статью
+            const randomArticle = articles[Math.floor(Math.random() * articles.length)];
+            
+            // Получаем содержимое статьи
+            const articleResponse = await fetch(`https://x200l.github.io/SITeducation/articles/${randomArticle.file}`);
+            const articleContent = await articleResponse.text();
+            
+            return {
+                title: randomArticle.title,
+                extract: randomArticle.preview,
+                fulltext: articleContent,
+                url: `https://x200l.github.io/SITeducation/articles.html?article=${randomArticle.id}`,
+                imageUrl: null, // У SITeducation статей нет картинок, используем логотип
+                source: 'siteducation'
+            };
+        } catch (error) {
+            console.error('Error fetching SIT article:', error);
+            throw error;
         }
     }
     
@@ -536,6 +593,35 @@ class WikiTock {
         this.articleTitle.textContent = 'Error loading article';
         this.articleExcerpt.textContent = 'Please try again later';
         this.articleImage.src = 'https://via.placeholder.com/400x300?text=Error';
+    }
+
+    // Обновляем настройки для отображения нового источника
+    updateSettings() {
+        const settingsPanel = document.querySelector('.settings-panel');
+        if (!settingsPanel) return;
+
+        settingsPanel.innerHTML = `
+            <h2>Settings</h2>
+            <div class="settings-group">
+                <label>
+                    Wikipedia Articles
+                    <input type="checkbox" ${this.sources.wikipedia ? 'checked' : ''} onchange="app.toggleSource('wikipedia', this.checked)">
+                </label>
+                <label>
+                    Habr Articles
+                    <input type="checkbox" ${this.sources.habr ? 'checked' : ''} onchange="app.toggleSource('habr', this.checked)">
+                </label>
+                <label>
+                    SITeducation Articles
+                    <input type="checkbox" ${this.sources.siteducation ? 'checked' : ''} onchange="app.toggleSource('siteducation', this.checked)">
+                </label>
+            </div>
+        `;
+    }
+
+    toggleSource(source, enabled) {
+        this.sources[source] = enabled;
+        localStorage.setItem('sources', JSON.stringify(this.sources));
     }
 }
 
