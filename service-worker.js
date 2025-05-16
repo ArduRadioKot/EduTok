@@ -5,7 +5,8 @@ const urlsToCache = [
   '/styles.css',
   '/script.js',
   '/manifest.json',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
+  'https://x200l.github.io/SITeducation/app.js'
 ];
 
 self.addEventListener('install', event => {
