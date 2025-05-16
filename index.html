@@ -2,8 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WikiTock - Wikipedia Shorts</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#121212">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>EduTock</title>
+    
+    <!-- PWA manifest -->
+    <link rel="manifest" href="manifest.json">
+    
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -16,12 +24,22 @@
                     <div class="article-info">
                         <h2 class="article-title"></h2>
                         <p class="article-excerpt"></p>
-                        <a href="#" class="read-more-btn" target="_blank">Read Full Article</a>
+                        
                     </div>
                 </div>
                 <div class="interaction-buttons">
-                    <button class="like-btn">❤️</button>
-                    <button class="next-btn">⏭️</button>
+                    <button class="like-btn">
+                        ❤️
+                        <span class="interaction-button-text">Like</span>
+                    </button>
+                    <a href="#" class="read-more-btn" target="_blank">
+                        📖
+                        <span class="interaction-button-text">Read</span>
+                    </a>
+                    <button class="next-btn">
+                        ⏭️
+                        <span class="interaction-button-text">Next</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -41,5 +59,14 @@
         </nav>
     </div>
     <script src="script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => console.log('ServiceWorker registered'))
+                    .catch(err => console.log('ServiceWorker registration failed: ', err));
+            });
+        }
+    </script>
 </body>
 </html> 

@@ -1,0 +1,10 @@
+{
+  "name": "EduTock",
+  "short_name": "EduTock",
+  "description": "Wikipedia and Habr articles in TikTok style",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "orientation": "portrait"
+} 
