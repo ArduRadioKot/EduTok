@@ -132,37 +132,26 @@ body {
 }
 
 .read-more-btn {
-    display: inline-block;
-    background-color: #3f51b5;
-    color: white;
-    padding: 12px 24px;
-    border-radius: 25px;
+    font-size: 16px;
+    padding: 8px;
+    margin-bottom: 0;
     text-decoration: none;
-    font-weight: bold;
-    text-align: center;
-    transition: all 0.3s ease;
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    margin-bottom: 80px;
-}
-
-.read-more-btn:hover {
-    background-color: #303f9f;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    box-shadow: none;
+    background-color: rgba(33, 33, 33, 0.7);
 }
 
 .interaction-buttons {
     position: absolute;
     right: 20px;
-    bottom: 20px;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
     flex-direction: column;
     gap: 20px;
     z-index: 10;
 }
 
-.like-btn, .next-btn {
+.like-btn, .next-btn, .read-more-btn {
     background: none;
     border: none;
     font-size: 28px;
@@ -172,6 +161,10 @@ body {
     background-color: rgba(33, 33, 33, 0.7);
     transition: all 0.3s ease;
     color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
 }
 
 .like-btn:hover, .next-btn:hover {
@@ -497,17 +490,26 @@ body {
 
     .interaction-buttons {
         right: 10px;
-        bottom: 70px;
-        gap: 10px;
     }
 
     .like-btn,
-    .next-btn {
+    .next-btn,
+    .read-more-btn {
         font-size: 24px;
         padding: 10px;
+    }
+
+    .interaction-button-text {
+        font-size: 10px;
     }
 
     .survey-container {
         width: 90%;
     }
+}
+
+/* Add text under icons */
+.interaction-button-text {
+    font-size: 12px;
+    text-align: center;
 } 
