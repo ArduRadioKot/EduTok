@@ -1,11 +1,12 @@
 const CACHE_NAME = 'edutock-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/script.js',
-  '/manifest.json',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
+  '.',
+  './index.html',
+  './styles.css',
+  './script.js',
+  './manifest.json',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
+  'https://x200l.github.io/SITeducation/app.js'
 ];
 
 self.addEventListener('install', event => {
