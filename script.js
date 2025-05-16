@@ -18,7 +18,7 @@ class WikiTock {
             language: 'en',
             showImages: true,
             autoPlay: true,
-            articleSource: 'all' // Default value
+            articleSource: 'all' // возможные значения: 'wikipedia', 'habr', 'siteducation', 'all'
         };
         
         // Swipe variables
@@ -326,6 +326,7 @@ class WikiTock {
                     <select id="article-source-select">
                         <option value="wikipedia" ${this.settings.articleSource === 'wikipedia' ? 'selected' : ''}>Wikipedia</option>
                         <option value="habr" ${this.settings.articleSource === 'habr' ? 'selected' : ''}>Habr</option>
+                        <option value="siteducation" ${this.settings.articleSource === 'siteducation' ? 'selected' : ''}>SITeducation</option>
                         <option value="all" ${this.settings.articleSource === 'all' ? 'selected' : ''}>All</option>
                     </select>
                 </label>
@@ -377,14 +378,26 @@ class WikiTock {
     
     async fetchRandomArticle() {
         const source = this.settings.articleSource;
-        if (source === 'wikipedia' || source === 'all') {
-            if (source === 'all' && Math.random() < 0.5) {
-                return this.fetchRandomWikipediaArticle();
-            } else {
-                return this.fetchRandomWikipediaArticle();
-            }
-        } else if (source === 'habr') {
-            return this.fetchRandomHabrArticle();
+        
+        switch (source) {
+            case 'wikipedia':
+                return await this.fetchRandomWikipediaArticle();
+            case 'habr':
+                return await this.fetchRandomHabrArticle();
+            case 'siteducation':
+                return await this.fetchRandomSITArticle();
+            case 'all':
+                // Случайный выбор источника
+                const sources = ['wikipedia', 'habr', 'siteducation'];
+                const randomSource = sources[Math.floor(Math.random() * sources.length)];
+                switch (randomSource) {
+                    case 'wikipedia':
+                        return await this.fetchRandomWikipediaArticle();
+                    case 'habr':
+                        return await this.fetchRandomHabrArticle();
+                    case 'siteducation':
+                        return await this.fetchRandomSITArticle();
+                }
         }
     }
     
@@ -458,6 +471,44 @@ class WikiTock {
         } catch (error) {
             console.error('Error fetching Habr article:', error);
             return null;
+        }
+    }
+    
+    async fetchRandomSITArticle() {
+        try {
+            // Получаем список всех статей с главной страницы
+            const response = await fetch('https://x200l.github.io/SITeducation/articles.html');
+            const text = await response.text();
+            
+            // Парсим HTML
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(text, 'text/html');
+            
+            // Получаем все статьи
+            const articles = Array.from(doc.querySelectorAll('.article-card'));
+            
+            if (articles.length === 0) {
+                throw new Error('No articles found');
+            }
+            
+            // Выбираем случайную статью
+            const randomArticle = articles[Math.floor(Math.random() * articles.length)];
+            
+            // Получаем данные статьи
+            const title = randomArticle.querySelector('.article-title').textContent;
+            const preview = randomArticle.querySelector('.article-preview').textContent;
+            const articleId = randomArticle.getAttribute('data-article-id');
+            
+            return {
+                title: title,
+                extract: preview,
+                url: `https://x200l.github.io/SITeducation/articles.html?article=${articleId}`,
+                imageUrl: 'https://dummyimage.com/400x300/000/fff&text=SITeducation',
+                source: 'siteducation'
+            };
+        } catch (error) {
+            console.error('Error fetching SIT article:', error);
+            return await this.fetchRandomWikipediaArticle(); // Fallback to Wikipedia if SIT fails
         }
     }
     
