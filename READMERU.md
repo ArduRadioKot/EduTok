@@ -1,4 +1,4 @@
-# EduTock  
+# EduTock  - https://arduradiokot.github.io/EduTok/
 [EN README](README.md) | [RU README](READMERU.md)  
 
 ![Логотип EduTock](header.png)  
