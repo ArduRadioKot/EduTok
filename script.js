@@ -528,12 +528,13 @@ class WikiTock {
                     this.updateUI();
                     this.preloadNextArticle(); // Preload the next one
                 } else {
-                    this.showError();
+                    console.error('Failed to fetch article.');
+                    // Keep the current background and content if article fetching fails
                 }
             }
         } catch (error) {
             console.error('Error loading article:', error);
-            this.showError();
+            // Keep the current background and content on error
         }
     }
     
@@ -541,33 +542,79 @@ class WikiTock {
         this.articleTitle.textContent = this.currentArticle.title;
         this.articleExcerpt.textContent = this.currentArticle.extract;
 
-        const img = new Image();
+        // Set default background image first
+        this.videoCard.style.backgroundImage = `url("bac.png")`;
+        this.videoCard.style.position = 'relative';
+
+        // Remove existing loading spinner
+        const existingSpinner = this.videoCard.querySelector('.loading-spinner');
+        if (existingSpinner) {
+            existingSpinner.remove();
+        }
+
+        // Set Habr logo if source is Habr, overriding the default background
         if (this.settings.articleSource === 'habr') {
             this.videoCard.style.backgroundImage = `url("https://habr.com/img/habr_logo.svg")`;
-        } else {
-            this.videoCard.style.backgroundImage = `url("https://dummyimage.com/100x75/000/fff&text=Loading")`;
         }
-        img.onload = async () => {
-            try {
-                await img.decode();
-                this.videoCard.style.backgroundImage = `url("${this.settings.showImages ? this.currentArticle.imageUrl : 'https://via.placeholder.com/400x300?text=No+Image'}")`;
-            } catch (e) {
-                console.warn("Failed to decode image, but still displaying it", e);
-                this.videoCard.style.backgroundImage = `url("${this.settings.showImages ? this.currentArticle.imageUrl : 'https://via.placeholder.com/400x300?text=No+Image'}")`;
+
+        // Load article image if showImages is true and not Habr source
+        // This will override bac.png ONLY if successful.
+        // On failure, it will explicitly revert to bac.png.
+        if (this.settings.showImages && this.currentArticle.imageUrl && this.settings.articleSource !== 'habr') {
+            const img = new Image();
+            
+            // Create and append spinner ONLY if there's actually a URL to attempt loading
+            let loadingSpinner = null;
+            if (this.currentArticle.imageUrl) {
+                 loadingSpinner = document.createElement('div');
+                 loadingSpinner.className = 'loading-spinner';
+                 this.videoCard.appendChild(loadingSpinner);
             }
-            loadingSpinner.remove();
-        };
-        img.onerror = () => {
-            this.videoCard.style.backgroundImage = `url("https://dummyimage.com/400x300/000/fff&text=Error")`;
-            loadingSpinner.remove();
-        };
-        const loadingSpinner = document.createElement('div');
-        loadingSpinner.className = 'loading-spinner';
-        this.videoCard.appendChild(loadingSpinner);
-        img.src = this.settings.showImages ? this.currentArticle.imageUrl : 'https://via.placeholder.com/400x300?text=No+Image';
+
+            img.onload = async () => {
+                // Remove spinner if it exists
+                if(loadingSpinner) loadingSpinner.remove();
+
+                try {
+                    await img.decode();
+                    // Only change background if decoding is successful and showImages is still true
+                    if (this.settings.showImages) {
+                         this.videoCard.style.backgroundImage = `url("${this.currentArticle.imageUrl}")`;
+                    } else {
+                        // If showImages became false during loading, revert to default background
+                         this.videoCard.style.backgroundImage = `url("bac.png")`;
+                    }
+                } catch (e) {
+                    console.warn("Failed to decode image, resetting to default background", e);
+                    // Reset to default background on decode error
+                    this.videoCard.style.backgroundImage = `url("bac.png")`;
+                }
+            };
+
+            img.onerror = () => {
+                console.warn("Failed to load image, resetting to default background", e);
+                // Reset to default background on load error
+                this.videoCard.style.backgroundImage = `url("bac.png")`;
+                // Remove spinner
+                if(loadingSpinner) loadingSpinner.remove();
+            };
+
+            // Only attempt to set src if imageUrl exists
+            if (this.currentArticle.imageUrl) {
+               img.src = this.currentArticle.imageUrl;
+            } else if (loadingSpinner) {
+               // If no imageUrl but spinner was created (shouldn't happen with current logic, but as safeguard)
+               loadingSpinner.remove();
+            }
+
+        } else if (this.settings.articleSource !== 'habr') {
+             // If showImages is false or no imageUrl for non-Habr source, ensure default background is used
+             this.videoCard.style.backgroundImage = `url("bac.png")`;
+        }
+        // If source is Habr and showImages is false or no imageUrl, Habr logo remains (set above)
 
         this.readMoreBtn.href = this.currentArticle.url;
-        
+
         // Update like button state
         this.likeBtn.classList.toggle('liked', this.likedArticles.has(this.currentArticle.title));
     }
@@ -581,12 +628,6 @@ class WikiTock {
             }
             this.updateUI();
         }
-    }
-    
-    showError() {
-        this.articleTitle.textContent = 'Error loading article';
-        this.articleExcerpt.textContent = 'Please try again later';
-        this.articleImage.src = 'https://via.placeholder.com/400x300?text=Error';
     }
 }
 
